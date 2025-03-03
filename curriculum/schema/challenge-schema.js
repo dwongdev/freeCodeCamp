@@ -112,7 +112,14 @@ const quizJoi = Joi.object().keys({
         answer: Joi.string().required()
       })
     )
-    .length(20)
+    .custom((value, helpers) => {
+      return value.length === 10 || value.length === 20
+        ? value
+        : helpers.error('array.invalidLength');
+    })
+    .messages({
+      'array.invalidLength': 'Quiz must have exactly 10 or 20 questions.'
+    })
     .required()
 });
 
@@ -148,7 +155,7 @@ const schema = Joi.object()
       otherwise: Joi.optional()
     }),
     certification: Joi.string().regex(slugWithSlashRE),
-    challengeType: Joi.number().min(0).max(25).required(),
+    challengeType: Joi.number().min(0).max(26).required(),
     checksum: Joi.number(),
     // TODO: require this only for normal challenges, not certs
     dashedName: Joi.string().regex(slugRE),
@@ -273,6 +280,9 @@ const schema = Joi.object()
     superBlock: Joi.string().regex(slugWithSlashRE),
     superOrder: Joi.number(),
     suborder: Joi.number(),
+    hooks: Joi.object().keys({
+      beforeAll: Joi.string().allow('')
+    }),
     tests: Joi.array()
       .items(
         // public challenges
